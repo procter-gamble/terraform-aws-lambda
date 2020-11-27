@@ -4,10 +4,6 @@ output "this_lambda_function_arn" {
   value       = element(concat(aws_lambda_function.this.*.arn, [""]), 0)
 }
 
-output "this_lambda_function_unique_id" {
-  description = "The unique_id of the Lambda Function"
-  value       = element(concat(aws_lambda_function.this.*.unique_id, [""]), 0)
-}
 output "this_lambda_function_invoke_arn" {
   description = "The Invoke ARN of the Lambda Function"
   value       = element(concat(aws_lambda_function.this.*.invoke_arn, [""]), 0)
@@ -78,6 +74,11 @@ output "this_lambda_layer_version" {
 output "lambda_role_arn" {
   description = "The ARN of the IAM role created for the Lambda Function"
   value       = element(concat(aws_iam_role.lambda.*.arn, [""]), 0)
+}
+
+output "lambda_role_unique_id" {
+  description = "The unique_id of the IAM role created for the Lambda Function"
+  value       = element(concat(aws_iam_role.lambda.*.unique_id, [""]), 0)
 }
 
 output "lambda_role_name" {

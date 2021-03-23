@@ -1,6 +1,7 @@
-# Simple example
+# Triggers of AWS Lambda examples
 
-Configuration in this directory creates Lambda Function in a simple configuration. Use this as a playground.
+Configuration in this directory creates AWS Lambda Function with some triggers (eg. CloudWatch Events).
+
 
 ## Usage
 
@@ -20,13 +21,14 @@ Note that this example may create resources which cost money. Run `terraform des
 | Name | Version |
 |------|---------|
 | terraform | >= 0.12.26 |
-| aws | >= 3.19 |
+| aws | >= 2.67 |
 | random | >= 2 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
+| aws | >= 2.67 |
 | random | >= 2 |
 
 ## Modules
@@ -39,6 +41,8 @@ Note that this example may create resources which cost money. Run `terraform des
 
 | Name |
 |------|
+| [aws_cloudwatch_event_rule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) |
+| [aws_cloudwatch_event_target](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_target) |
 | [random_pet](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/pet) |
 
 ## Inputs

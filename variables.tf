@@ -62,7 +62,7 @@ variable "runtime" {
 }
 
 variable "lambda_role" {
-  description = " IAM role attached to the Lambda Function. This governs both who / what can invoke your Lambda Function, as well as what resources our Lambda Function has access to. See Lambda Permission Model for more details."
+  description = " IAM role ARN attached to the Lambda Function. This governs both who / what can invoke your Lambda Function, as well as what resources our Lambda Function has access to. See Lambda Permission Model for more details."
   type        = string
   default     = ""
 }
@@ -86,7 +86,7 @@ variable "kms_key_arn" {
 }
 
 variable "memory_size" {
-  description = "Amount of memory in MB your Lambda Function can use at runtime. Valid value between 128 MB to 3008 MB, in 64 MB increments."
+  description = "Amount of memory in MB your Lambda Function can use at runtime. Valid value between 128 MB to 10,240 MB (10 GB), in 64 MB increments."
   type        = number
   default     = 128
 }
@@ -149,6 +149,36 @@ variable "s3_object_tags" {
   description = "A map of tags to assign to S3 bucket object."
   type        = map(string)
   default     = {}
+}
+
+variable "package_type" {
+  description = "The Lambda deployment package type. Valid options: Zip or Image"
+  type        = string
+  default     = "Zip"
+}
+
+variable "image_uri" {
+  description = "The ECR image URI containing the function's deployment package."
+  type        = string
+  default     = null
+}
+
+variable "image_config_entry_point" {
+  description = "The ENTRYPOINT for the docker image"
+  type        = list(string)
+  default     = []
+
+}
+variable "image_config_command" {
+  description = "The CMD for the docker image"
+  type        = list(string)
+  default     = []
+}
+
+variable "image_config_working_directory" {
+  description = "The working directory for the docker image"
+  type        = string
+  default     = null
 }
 
 ########
@@ -248,6 +278,16 @@ variable "create_unqualified_alias_allowed_triggers" {
 variable "allowed_triggers" {
   description = "Map of allowed triggers to create Lambda permissions"
   type        = map(any)
+  default     = {}
+}
+
+############################################
+# Lambda Event Source Mapping
+############################################
+
+variable "event_source_mapping" {
+  description = "Map of event source mapping"
+  type        = any
   default     = {}
 }
 
@@ -479,6 +519,18 @@ variable "s3_object_storage_class" {
 
 variable "s3_bucket" {
   description = "S3 bucket to store artifacts"
+  type        = string
+  default     = null
+}
+
+variable "s3_acl" {
+  description = "The canned ACL to apply. Valid values are private, public-read, public-read-write, aws-exec-read, authenticated-read, bucket-owner-read, and bucket-owner-full-control. Defaults to private."
+  type        = string
+  default     = "private"
+}
+
+variable "s3_server_side_encryption" {
+  description = "Specifies server-side encryption of the object in S3. Valid values are \"AES256\" and \"aws:kms\"."
   type        = string
   default     = null
 }

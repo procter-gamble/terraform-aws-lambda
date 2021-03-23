@@ -70,6 +70,27 @@ output "this_lambda_layer_version" {
   value       = element(concat(aws_lambda_layer_version.this.*.version, [""]), 0)
 }
 
+# Lambda Event Source Mapping
+output "this_lambda_event_source_mapping_function_arn" {
+  description = "The the ARN of the Lambda function the event source mapping is sending events to"
+  value       = { for k, v in aws_lambda_event_source_mapping.this : k => v.function_arn }
+}
+
+output "this_lambda_event_source_mapping_state" {
+  description = "The state of the event source mapping"
+  value       = { for k, v in aws_lambda_event_source_mapping.this : k => v.state }
+}
+
+output "this_lambda_event_source_mapping_state_transition_reason" {
+  description = "The reason the event source mapping is in its current state"
+  value       = { for k, v in aws_lambda_event_source_mapping.this : k => v.state_transition_reason }
+}
+
+output "this_lambda_event_source_mapping_uuid" {
+  description = "The UUID of the created event source mapping"
+  value       = { for k, v in aws_lambda_event_source_mapping.this : k => v.uuid }
+}
+
 # IAM Role
 output "lambda_role_arn" {
   description = "The ARN of the IAM role created for the Lambda Function"
@@ -92,6 +113,11 @@ output "lambda_cloudwatch_log_group_arn" {
   value       = local.log_group_arn
 }
 
+output "lambda_cloudwatch_log_group_name" {
+  description = "The name of the Cloudwatch Log Group"
+  value       = local.log_group_name
+}
+
 # Deployment package
 output "local_filename" {
   description = "The filename of zip archive deployed (if deployment was from local)"
@@ -100,5 +126,9 @@ output "local_filename" {
 
 output "s3_object" {
   description = "The map with S3 object data of zip archive deployed (if deployment was from S3)"
-  value       = map("bucket", local.s3_bucket, "key", local.s3_key, "version_id", local.s3_object_version)
+  value = {
+    bucket     = local.s3_bucket
+    key        = local.s3_key
+    version_id = local.s3_object_version
+  }
 }

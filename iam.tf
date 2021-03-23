@@ -1,12 +1,17 @@
 locals {
-  create_role = var.create && var.create_function && ! var.create_layer && var.create_role
+  create_role = var.create && var.create_function && !var.create_layer && var.create_role
 
   # Lambda@Edge uses the Cloudwatch region closest to the location where the function is executed
   # The region part of the LogGroup ARN is then replaced with a wildcard (*) so Lambda@Edge is able to log in every region
   log_group_arn_regional = element(concat(data.aws_cloudwatch_log_group.lambda.*.arn, aws_cloudwatch_log_group.lambda.*.arn, [""]), 0)
+  log_group_name         = element(concat(data.aws_cloudwatch_log_group.lambda.*.name, aws_cloudwatch_log_group.lambda.*.name, [""]), 0)
   log_group_arn          = local.create_role && var.lambda_at_edge ? format("arn:%s:%s:%s:%s:%s", data.aws_arn.log_group_arn[0].partition, data.aws_arn.log_group_arn[0].service, "*", data.aws_arn.log_group_arn[0].account, data.aws_arn.log_group_arn[0].resource) : local.log_group_arn_regional
 
-  role_name = local.create_role ? coalesce(var.role_name, var.function_name) : null
+  # Defaulting to "*" (an invalid character for an IAM Role name) will cause an error when
+  #   attempting to plan if the role_name and function_name are not set.  This is a workaround
+  #   for #83 that will allow one to import resources without receiving an error from coalesce.
+  # @see https://github.com/terraform-aws-modules/terraform-aws-lambda/issues/83
+  role_name = local.create_role ? coalesce(var.role_name, var.function_name, "*") : null
 }
 
 ###########
@@ -22,7 +27,7 @@ data "aws_iam_policy_document" "assume_role" {
 
     principals {
       type        = "Service"
-      identifiers = distinct(concat(slice(list("lambda.amazonaws.com", "edgelambda.amazonaws.com"), 0, var.lambda_at_edge ? 2 : 1), var.trusted_entities))
+      identifiers = distinct(concat(slice(["lambda.amazonaws.com", "edgelambda.amazonaws.com"], 0, var.lambda_at_edge ? 2 : 1), var.trusted_entities))
     }
   }
 }
@@ -56,10 +61,11 @@ data "aws_iam_policy_document" "logs" {
   statement {
     effect = "Allow"
 
-    actions = [
+    actions = compact([
+      !var.use_existing_cloudwatch_log_group ? "logs:CreateLogGroup" : "",
       "logs:CreateLogStream",
-      "logs:PutLogEvents",
-    ]
+      "logs:PutLogEvents"
+    ])
 
     resources = flatten([for _, v in ["%v:*", "%v:*:*"] : format(v, local.log_group_arn)])
   }
@@ -181,6 +187,7 @@ data "aws_iam_policy_document" "async" {
     actions = [
       "sns:Publish",
       "sqs:SendMessage",
+      "events:PutEvents",
     ]
 
     resources = compact(distinct([var.destination_on_failure, var.destination_on_success]))

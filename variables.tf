@@ -28,6 +28,12 @@ variable "create_role" {
   default     = true
 }
 
+variable "trigger_via_timestamp" {
+  description = "Controls whether or not timestamps trigger a new package."
+  type        = bool
+  default     = false
+}
+
 ###########
 # Function
 ###########
